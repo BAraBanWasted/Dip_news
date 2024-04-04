@@ -2,10 +2,12 @@ import styles from './styles.module.css'
 import NewsBanner from '../../components/NewsBanner/NewsBanner'
 import { useEffect, useState } from 'react'
 import { getCategories, getNews } from '../../api/apiNews'
+import {useDebounce} from '../../helpers/hooks/useDebounce'
 import NewsList from "../../components/NewsList/NewsList"
 import Skeleton from '../../components/Skeleton/Skeleton'
 import Pagination from '../../components/Pagination/Pagination'
 import Categories from '../../components/Categories/Categories'
+import Search from '../../components/Search/Search'
 
 
 
@@ -15,8 +17,10 @@ export const Main = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [categories, setCategories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1)
+    const [keywords, setKeywords] = useState('')
     const totalPages = 10
     const pageSize = 10
+    const debouncedKeywords= useDebounce(keywords,1500)
 
     //Запросы
     const fetchNews = async (currentPage) => {
@@ -25,7 +29,8 @@ export const Main = () => {
             const response = await getNews({
                 page_number: currentPage,
                 page_size: pageSize,
-                category: selectedCategory === 'All' ? null : selectedCategory
+                category: selectedCategory === 'All' ? null : selectedCategory,
+                keywords: debouncedKeywords,
             })
             setNews(response.news);
             setIsLoading(false)
@@ -41,21 +46,24 @@ export const Main = () => {
             console.log(error);
         }
     }
-    
+
     useEffect(() => {
         fetchCategories()
     }, []);
+
     // срабатывает при изменении currentPage
+
     useEffect(() => {
         fetchNews(currentPage)
-    }, [currentPage, selectedCategory]);
+    }, [currentPage, selectedCategory,debouncedKeywords]);
+
     //переключение страницы по кнопкам < ,>
+
     const handleNextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1)
         }
     }
-
 
     const handlePreviosPage = () => {
         if (currentPage > 1) {
@@ -66,14 +74,18 @@ export const Main = () => {
     const handlePageClick = (pageNumber) => {
         setCurrentPage(pageNumber)
     }
-
+console.log(keywords)
     return (
         <main className={styles.main}>
-            <Categories 
-            categories={categories } 
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory} />
-
+            <Categories
+                categories={categories}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+            />
+            <Search 
+            keywords={keywords}
+            setKeywords={setKeywords}
+            />
 
             {news.length > 0 && !isLoading ? (
                 <NewsBanner item={news[0]} />
