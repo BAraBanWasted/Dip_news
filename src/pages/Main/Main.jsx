@@ -1,41 +1,88 @@
 import styles from './styles.module.css'
 import NewsBanner from '../../components/NewsBanner/NewsBanner'
-import { useEffect, useState } from 'react'
-import { getNews } from '../../api/apiNews'
+import { getCategories, getNews } from '../../api/apiNews'
+import { useDebounce } from '../../helpers/hooks/useDebounce'
+import { useFetch } from '../../helpers/hooks/useFetch'
 import NewsList from "../../components/NewsList/NewsList"
-import Skeleton from '../../components/Skeleton/Skeleton'
-
-
+import Pagination from '../../components/Pagination/Pagination'
+import Categories from '../../components/Categories/Categories'
+import Search from '../../components/Search/Search'
+import { TOTAL_PAGES } from '../../constants/constants'
+import { PAGE_SIZE } from '../../constants/constants'
+import { useFilters } from '../../helpers/hooks/useFilters'
 
 
 export const Main = () => {
-    const [news, setNews] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-    useEffect(() => {
-        const fetchNews = async () => {
-            try {
-                setIsLoading(true)
-                const response = await getNews()
-                setNews(response.news);
-                setIsLoading(false)
-            } catch (error) {
-                console.log(error);
-            }
+    const { filters, changeFilters } = useFilters({
+        page_number: 1,
+        page_size: PAGE_SIZE,
+        category: null,
+        keywords: '',
+    })
+    const debouncedKeywords = useDebounce(filters.keywords, 1500)
+    const { data, isLoading } = useFetch(getNews, {
+        ...filters,
+        keywords: debouncedKeywords,
+    })
+
+    const { data: dataCategoties } = useFetch(getCategories);
+
+    //переключение страницы по кнопкам < ,>
+
+    const handleNextPage = () => {
+        if (filters.page_number < TOTAL_PAGES) {
+            changeFilters('page_number', filters.page_number + 1)
         }
-        fetchNews()
-    }, []);
+    }
+
+    const handlePreviosPage = () => {
+        if (filters.page_number > 1) {
+            changeFilters('page_number', filters.page_number - 1)
+        }
+    }
+
+    const handlePageClick = (pageNumber) => {
+        changeFilters('page_number', pageNumber)
+    }
+
     return (
         <main className={styles.main}>
-            {news.length > 0 && !isLoading ? (
-                <NewsBanner item={news[0]} />
-            ) : (
-                <Skeleton type={'banner'} count={1} />
-            )}
-            {!isLoading ? (
-                <NewsList news={news} />
-            ) : (
-                <Skeleton type={'item'} count={10} />
-            )}
+            {dataCategoties ?
+                <Categories
+                    categories={dataCategoties.categories}
+                    selectedCategory={filters.category}
+                    setSelectedCategory={(category) => changeFilters('category', category)}
+                /> : null}
+
+            <Search
+                keywords={filters.keywords}
+                setKeywords={(keywords) => changeFilters('keywords', keywords)}
+            />
+
+            <NewsBanner
+                isLoading={isLoading}
+                item={data && data.news && data.news[0]}
+            />
+
+            <Pagination
+                handleNextPage={handleNextPage}
+                handlePreviosPage={handlePreviosPage}
+                handlePageClick={handlePageClick}
+                totalPages={TOTAL_PAGES}
+                currentPage={filters.page_number}
+            />
+            <NewsList
+                isLoading={isLoading}
+                news={data?.news}
+            />
+
+            <Pagination
+                handleNextPage={handleNextPage}
+                handlePreviosPage={handlePreviosPage}
+                handlePageClick={handlePageClick}
+                totalPages={TOTAL_PAGES}
+                currentPage={filters.page_number}
+            />
         </main>
     )
 }
