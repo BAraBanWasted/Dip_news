@@ -1,18 +1,30 @@
-#Web application for viewing news for mobile phones
-To launch the application you need:
-1.Download the contents of the repository
-2.Open a terminal in the project root
-3.Enter the command to initialize the project #-npm i 
-4.Enter the run command #-npm run dev
-Разработка
-Требования
-Для установки и запуска проекта, необходим NodeJS.
+# Dip_news
 
-Установка зависимостей
+Web application for viewing news for mobile phones
+
+## Содержание
+
+- [Технологии](#технологии)
+- [Начало работы](#начало-работы)
+
+## Технологии
+
+- [React](https://react.dev/blog)
+- [Axios](https://axios-http.com/ru/docs/intro)
+- [vitejs](https://vitejs.dev/guide/)
+
+### Установка зависимостей
+
 Для установки зависимостей, выполните команду:
 
-npm i
-Запуск Development сервера
+```sh
+$ npm i
+````
+
+### Запуск Development сервера
+
 Чтобы запустить сервер для разработки, выполните команду:
 
+```sh
 npm run dev
+```
