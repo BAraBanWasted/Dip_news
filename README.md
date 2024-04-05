@@ -4,3 +4,15 @@ To launch the application you need:
 2.Open a terminal in the project root
 3.Enter the command to initialize the project #-npm i 
 4.Enter the run command #-npm run dev
+Разработка
+Требования
+Для установки и запуска проекта, необходим NodeJS.
+
+Установка зависимостей
+Для установки зависимостей, выполните команду:
+
+npm i
+Запуск Development сервера
+Чтобы запустить сервер для разработки, выполните команду:
+
+npm run dev
